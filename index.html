@@ -645,7 +645,7 @@ document.querySelectorAll('a[href="tel:+16097802766"]').forEach(function(el){
 <script data-cfasync="false">
 function toggleMenu(){const m=document.getElementById('mob-menu');m.classList.toggle('open')}
 document.querySelectorAll('#mob-menu a').forEach(a=>a.addEventListener('click',()=>document.getElementById('mob-menu').classList.remove('open')));
-const ASURL="https://script.google.com/macros/s/AKfycbwYwTUFOi_qrlb5ZxP4nPfdRR_bjoZeu2Pp9pq79QU-hlHuPLAxrAHcWNWtAllKsOjr/exec";
+const ASURL="https://script.google.com/macros/s/AKfycbykQpaIECNXOq99nNrYl-duERsW7kBcCIcgyWdHSQp7azSNYKTm2hSPezA7U1gp_z6G/exec";
 let PR={house:{vinyl:.079,brick:.099,dryvit:.119,cedar:.145},drv:{cement:.25,pavers:.35},deck:{composite:.45,wood:.55},roof:{shingle:.35,terracotta:.50,woodshake:.55},fence:{vinyl:1.25,wood:1.5,iron:2.0}};
 let AO={gutterPerLf:.55,furniturePerPiece:10,awningPerSqft:1.5};
 let MIN_CHARGE=150;
@@ -702,17 +702,17 @@ function rCal(){const mn=['January','February','March','April','May','June','Jul
 function cPv(){cM--;if(cM<0){cM=11;cY--}rCal()}
 function cNx(){cM++;if(cM>11){cM=0;cY++}rCal()}
 async function pDate(dt){if(busy)return;sDate=dt;sSlot=null;g('n1').disabled=true;rCal();const ss=g('sl-s'),sg=g('sl-gr'),se=g('sl-em');ss.style.display='block';sg.innerHTML='<div style="font-size:.8rem;color:#999;grid-column:1/-1">Loading…</div>';se.style.display='none';busy=true;
-  try{const ds=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'getAvailableSlots',date:ds})});const data=await r.json();sg.innerHTML='';
+  try{const ds=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'getAvailableSlots',brand:'osprey',date:ds})});const data=await r.json();sg.innerHTML='';
   if(data.success&&data.slots&&data.slots.length){data.slots.forEach(sl=>{const e=document.createElement('div');e.className='sl';e.textContent=new Date(sl).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});e.addEventListener('click',()=>{document.querySelectorAll('.sl').forEach(x=>x.classList.remove('sel'));e.classList.add('sel');sSlot=sl;g('n1').disabled=false});sg.appendChild(e)})}else se.style.display='block'}catch{sg.innerHTML='';showE('e1','Could not load times. Call (609) 780-2766.')}busy=false}
 async function subB(){const n=g('b-n').value.trim(),e=g('b-e').value.trim(),p=g('b-p').value.trim();if(!n||!e||!p){showE('e3','Please fill in name, phone, and email.');return}const btn=g('c-bt');btn.disabled=true;btn.innerHTML='<span class="sp"></span>Booking…';
-  const rawHrs=est/200;const durHrs=Math.max(1,Math.ceil(rawHrs*2)/2);try{const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'bookAppointment',customerName:n,customerEmail:e,customerPhone:p,appointmentTime:sSlot,durationHours:durHrs,services:bS(),estimate:estTot,subtotal:est,salesTax:estTax,taxRate:TAX_RATE,notes:(g('b-a').value+' '+g('b-no').value).trim(),smsConsent:(g('b-sms')&&g('b-sms').checked)?'Yes':'No'})});const data=await r.json();
+  const rawHrs=est/200;const durHrs=Math.max(1,Math.ceil(rawHrs*2)/2);try{const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'bookAppointment',brand:'osprey',customerName:n,customerEmail:e,customerPhone:p,appointmentTime:sSlot,durationHours:durHrs,services:bS(),estimate:estTot,subtotal:est,salesTax:estTax,taxRate:TAX_RATE,notes:(g('b-a').value+' '+g('b-no').value).trim(),smsConsent:(g('b-sms')&&g('b-sms').checked)?'Yes':'No'})});const data=await r.json();
   if(data.success){[1,2,3].forEach(i=>g('s'+i).style.display='none');g('suc').style.display='block';g('s-mg').textContent='Your appointment on '+new Date(sSlot).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})+' is confirmed! Check '+e+' for your confirmation.';
     if(typeof fbq==='function'){fbq('track','Lead',{value:est,currency:'USD',content_name:'Booking Confirmed'});}
     if(typeof dataLayer!=='undefined'){dataLayer.push({event:'booking_confirmed',value:est,currency:'USD'});}}else{showE('e3',data.error||'Booking failed. Please call (609) 780-2766.');btn.disabled=false;btn.innerHTML='🗓 Confirm Booking'}}catch{showE('e3','Network error. Please call (609) 780-2766.');btn.disabled=false;btn.innerHTML='🗓 Confirm Booking'}}
 function showE(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg;e.style.display='block';setTimeout(()=>e.style.display='none',6000)}}
 async function fetchPricing(){
   try{
-    const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'getPricingConfig'})});
+    const r=await fetch(ASURL,{method:'POST',body:JSON.stringify({action:'getPricingConfig',brand:'osprey'})});
     const data=await r.json();
     if(!data.success||!data.pricing)return;
     const p=data.pricing;
