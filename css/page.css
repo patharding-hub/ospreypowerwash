@@ -1,0 +1,25 @@
+/* Layout for the service and town pages. The palette, type and buttons all
+   come from site.css - nothing is redefined here. */
+.sub-hero{background:linear-gradient(160deg,var(--ink) 0%,#122b30 55%,#17505a 100%);padding:132px 5% 62px;color:#fff;position:relative;overflow:hidden}
+.sub-hero .crumb{font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:14px;letter-spacing:.5px}
+.sub-hero .crumb a{color:rgba(255,255,255,.72);text-decoration:none}
+.sub-hero .crumb a:hover{color:var(--sky)}
+.sub-hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.3rem,6.5vw,4.2rem);font-weight:900;line-height:.98;letter-spacing:1px;margin-bottom:18px}
+.sub-hero h1 em{color:var(--sky);font-style:normal;display:block}
+.sub-hero p{max-width:640px;color:rgba(255,255,255,.72);line-height:1.75;font-weight:300;font-size:1.05rem}
+.sub-hero .hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.prose{max-width:780px}
+.prose h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.5rem,3.4vw,2rem);font-weight:800;color:var(--ink);margin:38px 0 12px;line-height:1.15}
+.prose h2:first-child{margin-top:0}
+.prose p{color:#556;line-height:1.85;margin-bottom:15px;font-weight:300}
+.linkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;margin-top:18px}
+.linkgrid a{display:block;padding:12px 15px;background:var(--white);border:1.5px solid #dfe8e6;border-radius:9px;color:var(--ocean);text-decoration:none;font-weight:700;font-size:.9rem;transition:all .18s}
+.linkgrid a:hover{border-color:var(--sky);color:var(--ink);transform:translateY(-1px)}
+.endcta{background:var(--ink);text-align:center}
+.endcta h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.8rem,4.4vw,2.7rem);font-weight:800;color:#fff;margin-bottom:14px;line-height:1.1}
+.endcta p{color:rgba(255,255,255,.65);max-width:540px;margin:0 auto 28px;line-height:1.75;font-weight:300}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.figs figure{margin:0}
+.figs img{width:100%;height:240px;object-fit:cover;border-radius:12px;display:block}
+.figs figcaption{margin-top:9px;font-size:.85rem;color:#667;line-height:1.5;font-weight:300}
+@media(max-width:768px){.sub-hero{padding:108px 5% 48px}}
