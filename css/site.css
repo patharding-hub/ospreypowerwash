@@ -308,7 +308,7 @@ footer p{color:rgba(255,255,255,.3);font-size:.8rem}
 
 .cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:.8rem;cursor:pointer;border:2px solid transparent;transition:all .12s}
 
-.cd:hover:not(.dis):not(.emp){background:#e2f2ee;border-color:#14808a}
+@media (hover:hover){.cd:hover:not(.dis):not(.emp){background:#e2f2ee;border-color:#14808a}}
 
 .cd.sel{background:#14808a!important;color:#fff!important;border-color:#14808a}
 
