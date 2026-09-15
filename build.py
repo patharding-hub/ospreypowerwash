@@ -15,8 +15,8 @@ import re
 SITE = 'https://ospreypowerwash.com'
 BIZ = 'Osprey Power Wash'
 LEGAL = 'Tidal Wash LLC'
-PHONE_PRETTY = '(609) 780-2766'
-PHONE_E164 = '+16097802766'
+PHONE_PRETTY = '(609) 732-2007'
+PHONE_E164 = '+16097322007'
 EMAIL = 'contact@ospreypowerwash.com'
 INSTAGRAM = 'https://www.instagram.com/ospreypowerwash/'
 
