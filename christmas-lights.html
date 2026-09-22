@@ -15,8 +15,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=0478f75d">
-<link rel="stylesheet" href="css/page.css?v=0478f75d">
+<link rel="stylesheet" href="css/site.css?v=39051acd">
+<link rel="stylesheet" href="css/page.css?v=39051acd">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["LocalBusiness","HomeAndConstructionBusiness"],"@id":"https://ospreypowerwash.com/#business","name":"Osprey Power Wash","legalName":"Tidal Wash LLC","url":"https://ospreypowerwash.com/","telephone":"+16097322007","email":"contact@ospreypowerwash.com","image":"https://ospreypowerwash.com/img/house-washing.jpg","priceRange":"$$","address":{"@type":"PostalAddress","addressLocality":"Corbin City","addressRegion":"NJ","postalCode":"08270","addressCountry":"US"},"areaServed":[{"@type":"City","name":"Ocean City"},{"@type":"City","name":"Sea Isle City"},{"@type":"City","name":"Avalon"},{"@type":"City","name":"Stone Harbor"},{"@type":"City","name":"Cape May"},{"@type":"City","name":"Somers Point"},{"@type":"City","name":"Upper Township"},{"@type":"City","name":"Egg Harbor Township"},{"@type":"City","name":"Mays Landing"},{"@type":"City","name":"Galloway"},{"@type":"City","name":"Vineland"}],"sameAs":["https://www.instagram.com/ospreypowerwash/"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"07:00","closes":"17:00"}]},{"@type":"Service","name":"Christmas Lights","serviceType":"Christmas Lights","provider":{"@id":"https://ospreypowerwash.com/#business"},"description":"Professional Christmas light installation across South Jersey, from $649. We design it on a photo of your own house, install commercial-grade LED in any color, maintain it all season, take down from January and store it. Free custom design, no visit needed.","areaServed":[{"@type":"City","name":"Ocean City"},{"@type":"City","name":"Sea Isle City"},{"@type":"City","name":"Avalon"},{"@type":"City","name":"Stone Harbor"},{"@type":"City","name":"Cape May"},{"@type":"City","name":"Somers Point"},{"@type":"City","name":"Upper Township"},{"@type":"City","name":"Egg Harbor Township"},{"@type":"City","name":"Mays Landing"},{"@type":"City","name":"Galloway"},{"@type":"City","name":"Vineland"}]}]}</script>
 </head>
 <body>
@@ -176,7 +176,7 @@
       <p class="xb-note" id="x-mnote">We will text you to talk it through.</p>
     </div>
 
-    <div class="xb-when">
+    <div class="xb-when off" id="x-when">
       <label>Preferred day<input id="x-date" type="date"></label>
       <label>Preferred time<select id="x-time"></select></label>
     </div>
@@ -249,12 +249,20 @@
     "Phone call":"We will call you at the time you picked.",
     "In person":"We will come out and look at the house with you."
   };
+  // Day and time are only asked for when the customer has to be there: a text
+  // or an email needs no appointment, and asking for one is a question they
+  // have to answer for nothing.
+  function needsWhen(m){return m==="Phone call"||m==="In person"}
+  function syncWhen(){g("x-when").classList.toggle("off",!needsWhen(method))}
+  syncWhen();
+
   g("x-meths").addEventListener("click",function(e){
     var b=e.target.closest(".xb-meth"); if(!b)return;
     method=b.dataset.m;
     [].forEach.call(this.children,function(c){c.classList.remove("on")});
     b.classList.add("on");
     g("x-mnote").textContent=NOTES[method];
+    syncWhen();
   });
 
   // ---- photos: shrunk in the browser first. A modern phone photo is 3-4MB and
@@ -322,7 +330,8 @@
       var d=await post({action:"holidayLead",brand:BRAND,
         customerName:n,customerEmail:e,customerPhone:p,address:a,
         contactMethod:method,
-        preferredDate:g("x-date").value,preferredTime:g("x-time").value,
+        preferredDate:needsWhen(method)?g("x-date").value:"",
+        preferredTime:needsWhen(method)?g("x-time").value:"",
         packageInterest:g("x-pkg").value,notes:tidy(g("x-note").value),
         photoCount:shots.length,
         smsConsent:g("x-sms").checked?"Yes":"No",

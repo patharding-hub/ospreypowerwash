@@ -301,7 +301,7 @@ FALL_PKG_FOOT = ('Every package is designed for your porch, delivered, arranged 
                  'taken away again when you are ready &mdash; the week after Thanksgiving at '
                  'the latest. The price shown is where that size of display starts; what moves '
                  'it is the width of the porch, the number of steps and how much of the front '
-                 'you want covered. A 50&#37; deposit books your install week and buys the '
+                 'you want covered. A 25&#37; deposit books your install week and buys the '
                  'pumpkins for it; the balance is due on the day it goes up.')
 
 # --------------------------------------------------------------------------
@@ -1446,7 +1446,7 @@ SEASON_FORM = r"""<section class="xbook" id="book">
       <p class="xb-note" id="x-mnote">We will text you to talk it through.</p>
     </div>
 
-    <div class="xb-when">
+    <div class="xb-when off" id="x-when">
       <label>Preferred day<input id="x-date" type="date"></label>
       <label>Preferred time<select id="x-time"></select></label>
     </div>
@@ -1517,12 +1517,20 @@ __OPTS__
     "Phone call":"We will call you at the time you picked.",
     "In person":"We will come out and look at the house with you."
   };
+  // Day and time are only asked for when the customer has to be there: a text
+  // or an email needs no appointment, and asking for one is a question they
+  // have to answer for nothing.
+  function needsWhen(m){return m==="Phone call"||m==="In person"}
+  function syncWhen(){g("x-when").classList.toggle("off",!needsWhen(method))}
+  syncWhen();
+
   g("x-meths").addEventListener("click",function(e){
     var b=e.target.closest(".xb-meth"); if(!b)return;
     method=b.dataset.m;
     [].forEach.call(this.children,function(c){c.classList.remove("on")});
     b.classList.add("on");
     g("x-mnote").textContent=NOTES[method];
+    syncWhen();
   });
 
   // ---- photos: shrunk in the browser first. A modern phone photo is 3-4MB and
@@ -1590,7 +1598,8 @@ __OPTS__
       var d=await post({action:"holidayLead",brand:BRAND,
         customerName:n,customerEmail:e,customerPhone:p,address:a,
         contactMethod:method,
-        preferredDate:g("x-date").value,preferredTime:g("x-time").value,
+        preferredDate:needsWhen(method)?g("x-date").value:"",
+        preferredTime:needsWhen(method)?g("x-time").value:"",
         packageInterest:g("x-pkg").value,notes:tidy(g("x-note").value),
         photoCount:shots.length,
         smsConsent:g("x-sms").checked?"Yes":"No",
@@ -1948,6 +1957,7 @@ body.s-fall .scarce-dot{width:17px;height:17px;border-radius:0;background:var(--
 .xb-grid select option,.xb-when select option{color:#0f1a1f}
 .xb-grid input::placeholder{color:rgba(255,255,255,.3)}
 .xb-when{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.xb-when.off{display:none}
 .xbook .sms-opt{margin-top:12px}
 .xbook .sms-opt span{color:rgba(255,255,255,.72)}
 .xbook .sms-fine{color:rgba(255,255,255,.4);border-top-color:rgba(255,255,255,.12);margin-top:10px}
