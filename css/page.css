@@ -24,6 +24,16 @@
 .prose h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.5rem,3.4vw,2rem);font-weight:800;color:var(--ink);margin:38px 0 12px;line-height:1.15}
 .prose h2:first-child{margin-top:0}
 .prose p{color:#556;line-height:1.85;margin-bottom:15px;font-weight:300}
+/* Two-column explanation, used only on the pages that lead with prices. Real
+   CSS columns rather than a grid, so the text flows down one column and into
+   the next instead of leaving a ragged row whenever two topics differ in
+   length; break-inside keeps a heading with its own paragraphs. */
+.prose.cols{max-width:none;column-count:2;column-gap:50px}
+.prose.cols .pblock{break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:26px}
+.prose.cols .pblock h2{margin-top:0;font-size:clamp(1.22rem,2.3vw,1.48rem);margin-bottom:9px}
+.prose.cols p{font-size:.915rem;line-height:1.78;margin-bottom:12px}
+.prose.cols .pblock:last-child{margin-bottom:0}
+@media(max-width:880px){.prose.cols{column-count:1}}
 .linkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;margin-top:18px}
 .linkgrid a{display:block;padding:12px 15px;background:var(--white);border:1.5px solid #dfe8e6;border-radius:9px;color:var(--ocean);text-decoration:none;font-weight:700;font-size:.9rem;transition:all .18s}
 .linkgrid a:hover{border-color:var(--sky);color:var(--ink);transform:translateY(-1px)}
@@ -41,6 +51,44 @@
    page about lights that is entirely sea-green reads as a washing page. It is
    scoped to these blocks and never leaks into the rest of the site. */
 .pkg-wrap{--gold:#e0a83c}
+/* The fall page runs the same blocks on a pumpkin accent rather than a bulb gold. */
+.pkg-wrap.fall{--gold:#c2611f}
+
+/* ---- Fall porch page palette -------------------------------------------
+   The whole site is drawn from five custom properties, so a seasonal page
+   gets its own look by re-pointing those five rather than restating a
+   single rule. body.s-fall turns the page autumn; the nav, the mobile menu
+   and the footer are pinned straight back to the brand colors, because the
+   furniture should not change color from one page to the next. The two
+   hand-written gradients (the hero and the after-dark block) name their
+   colors directly, so those are the only two that need spelling out. */
+body.s-fall{--ink:#1d1206;--ocean:#a8551b;--sky:#edab45;--foam:#fdf2e3;--sand:#faf3e8}
+body.s-fall nav,body.s-fall #mob-menu,body.s-fall footer{--ink:#0f1a1f;--ocean:#1b6b72;--sky:#4fd1a5;--foam:#e6f4f1;--sand:#f5f3ee}
+body.s-fall .sub-hero{background:linear-gradient(160deg,#1d1206 0%,#4a2410 54%,#8d4616 100%)}
+/* The hero photo is bright daylight rather than the lighting page's night
+   shots, so the scrim is both warmer and heavier on the left where the text
+   sits. The photo is already cropped tight, so it is centered rather than
+   pulled down to 62%. */
+body.s-fall .sub-hero.has-photo{background-position:center center}
+body.s-fall .sub-hero.has-photo:before{background:linear-gradient(95deg,rgba(26,15,6,.94) 0%,rgba(26,15,6,.91) 44%,rgba(30,17,7,.74) 74%,rgba(40,22,9,.4) 100%)}
+@media(max-width:720px){body.s-fall .sub-hero.has-photo:before{background:linear-gradient(180deg,rgba(26,15,6,.9),rgba(30,17,7,.9))}}
+body.s-fall .btn-primary:hover{box-shadow:0 8px 24px rgba(237,171,69,.42)}
+body.s-fall .lit-wrap{background:linear-gradient(160deg,#241607,#17100a 58%,#32190a)}
+
+/* Festive touches, all from one drawing, held in a custom property so the
+   pumpkin is defined once and inherited by everything that wants it. */
+body.s-fall{--pumpkin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 6.2c-.6-.6-1.4-1-2.3-1C5.5 5.2 3.7 7.4 3.7 10.1s1.8 4.9 4 4.9c.9 0 1.7-.4 2.3-1 .6.6 1.4 1 2.3 1 2.2 0 4-2.2 4-4.9s-1.8-4.9-4-4.9c-.9 0-1.7.4-2.3 1z' fill='%23c2611f'/%3E%3Cpath d='M10 6.2V4.4c0-.8.7-1.5 1.5-1.5' fill='none' stroke='%234e7c33' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pkg-wrap.fall .pkg li:before{background:var(--pumpkin) center/contain no-repeat;border-radius:0;width:15px;height:15px;left:0;top:.28em}
+.pkg-wrap.fall .pkg li{padding-left:24px}
+body.s-fall .scarce-dot{width:17px;height:17px;border-radius:0;background:var(--pumpkin) center/contain no-repeat}
+
+/* The three things worth knowing before anyone reads a package, sat directly
+   under the section label so they are read on the way to the prices. */
+.pkg-points{list-style:none;padding:0;margin:13px 0 6px;display:flex;flex-wrap:wrap;gap:11px 36px}
+.pkg-points li{position:relative;padding-left:27px;font-size:1.02rem;font-weight:700;color:var(--ink);letter-spacing:.2px;line-height:1.4}
+.pkg-points li:before{content:"";position:absolute;left:0;top:.14em;width:18px;height:18px;background:var(--pumpkin) center/contain no-repeat}
+@media(max-width:700px){.pkg-points{flex-direction:column;gap:10px;margin-bottom:2px}.pkg-points li{font-size:.97rem}}
+.inc-ico{font-size:1.7rem;line-height:1;margin-bottom:11px}
 .pkgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px;align-items:start}
 .pkg{position:relative;background:var(--white);border:1.5px solid #dfe8e6;border-radius:14px;padding:26px 24px 24px;display:flex;flex-direction:column}
 .pkg.pop{border-color:var(--gold);box-shadow:0 10px 34px rgba(224,168,60,.16)}
@@ -54,6 +102,44 @@
 .pkg li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .pkg-cta{margin-top:auto;display:inline-block;font-weight:700;font-size:.9rem;color:var(--ocean);text-decoration:none}
 .pkg-cta:hover{color:var(--ink)}
+
+
+/* The season cap. It is a real constraint - fall installs and the first
+   Christmas installs share October - so it gets stated plainly
+   rather than dressed up as a countdown. */
+.scarce-wrap{padding-bottom:0}
+.scarce{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;background:#fdf3e6;border:1.5px solid #ecd4b0;border-radius:99px;padding:11px 24px;margin:0 auto;width:fit-content;max-width:100%;font-size:.88rem;font-weight:700;color:#8c4a12;letter-spacing:.3px;text-align:center}
+.scarce-dot{width:8px;height:8px;border-radius:50%;background:#c2611f;flex:0 0 auto}
+.scarce-sep{color:#d6b184}
+@media(max-width:520px){.scarce{flex-direction:column;gap:3px;border-radius:14px;padding:11px 18px;font-size:.84rem;line-height:1.4}.scarce-sep{display:none}.scarce-dot{display:none}}
+
+/* After-dark block on the fall page. Dark, because it is about what the porch
+   looks like at night and a cream panel makes that point badly. */
+.lit-wrap{background:linear-gradient(160deg,#13323a,#0e2830 60%,#1a2b22);color:#fff}
+.lit-wrap .section-label{color:#e8a84a}
+.lit-head{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.9rem,4.2vw,2.6rem);font-weight:900;color:#fff;line-height:1.08;margin:6px 0 12px;letter-spacing:.5px}
+.lit-lead{color:rgba(255,255,255,.72);line-height:1.8;font-weight:300;max-width:66ch;margin-bottom:28px}
+.lits{display:grid;gap:16px;margin-bottom:26px}
+.lit-row{display:flex;gap:16px;align-items:flex-start;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:19px 21px}
+.lit-ico{font-size:1.5rem;line-height:1;flex:0 0 auto;margin-top:2px}
+.lit-row h3{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:.4px;margin-bottom:6px;line-height:1.15}
+.lit-price{display:inline-block;background:rgba(224,168,60,.16);border:1px solid rgba(224,168,60,.35);color:#f0c274;border-radius:99px;padding:2px 11px;font-family:'Inter',system-ui,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.3px;margin-left:8px;vertical-align:middle;white-space:nowrap}
+.lit-row p{color:rgba(255,255,255,.7);line-height:1.72;font-weight:300;font-size:.93rem;margin:0}
+.lit-row p strong{color:#f0c274;font-weight:700}
+.lit-foot{color:rgba(255,255,255,.78);line-height:1.8;font-weight:300;font-size:.97rem;max-width:72ch;border-top:1px solid rgba(255,255,255,.13);padding-top:22px}
+.lit-foot strong{color:#fff;font-weight:700}
+@media(max-width:560px){.lit-row{flex-direction:column;gap:9px;padding:17px 18px}.lit-price{margin-left:0;display:block;width:fit-content;margin-top:6px}}
+.xsell-wrap{padding-top:0}
+.xsell{display:flex;gap:20px;align-items:flex-start;text-decoration:none;background:linear-gradient(105deg,#fff8ec,#fdf1e2 60%,#f7ece2);border:1.5px solid #ecd9bd;border-radius:16px;padding:26px 28px;transition:border-color .18s,box-shadow .18s,transform .18s}
+.xsell:hover{border-color:#d9b47a;box-shadow:0 12px 32px rgba(150,100,30,.13);transform:translateY(-2px)}
+.xsell-ico{font-size:2.3rem;line-height:1;flex:0 0 auto;margin-top:2px}
+.xsell-kick{font-size:.7rem;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#a8681d}
+.xsell h3{font-family:'Barlow Condensed',sans-serif;font-size:1.75rem;font-weight:900;color:var(--ink);line-height:1.1;margin:5px 0 9px;letter-spacing:.4px}
+.xsell p{color:#5a5147;line-height:1.75;font-weight:300;font-size:.95rem;margin:0 0 13px;max-width:62ch}
+.xsell p strong{font-weight:700;color:#8c4a12}
+.xsell-go{font-weight:700;font-size:.9rem;color:var(--ocean)}
+.xsell:hover .xsell-go{color:var(--ink)}
+@media(max-width:560px){.xsell{flex-direction:column;gap:12px;padding:22px 20px}.xsell-ico{font-size:2rem}}
 .pkg-foot{max-width:720px;margin-top:22px;color:#667;font-size:.88rem;line-height:1.75;font-weight:300}
 .incs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;margin-top:18px}
 .inc h3{font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:800;color:var(--ink);margin-bottom:7px;line-height:1.15}

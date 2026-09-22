@@ -8,6 +8,7 @@ nav and footer are lifted out of index.html at build time for the same reason
 
 Run from the project root:  python build.py
 """
+import hashlib
 import html
 import os
 import re
@@ -100,6 +101,208 @@ XMAS_INCLUDED = [
      'mid-February if you are in no hurry. Whenever you say, the lights come down and go into '
      'our storage rather than your attic. Next season you call and it goes straight back up.'),
 ]
+
+# The wording that makes the shared booking form a Christmas form. Everything
+# else about it -- the endpoint, the contact-method picker, the photo upload,
+# the consent boxes -- is identical on both seasonal pages.
+XMAS_FORM_CFG = dict(
+    label='Free consultation',
+    head='Ask for a consultation',
+    lead='Tell us when suits and how you would rather be reached. Most designs are drawn '
+         'without us setting foot on the property &mdash; from Street View, or from a couple '
+         'of photos you send us here. We come out in person when the house is awkward to see, '
+         'or when you would simply rather we did.',
+    emailnote='"We will email you, and send the design to the same address."',
+    noteph='Steep roof, dogs, gate code, HOA rules&hellip;',
+    extraval='Commercial',
+    extraopt='Commercial property',
+    photoleg='Photos of the front of the house',
+    photonote='Up to six. They are resized in your browser before they are sent, so a poor '
+              'signal is not a problem. If we cannot see the house well enough from these or '
+              'from Street View, we will arrange to come out.',
+    subject='holiday lighting consultation and quote',
+    btnicon='&#127876;',
+    btn='Request my consultation',
+    addrerr='Please give us the property address - the design is drawn on a picture of it.',
+)
+
+XMAS_PKG_FOOT = ('Every package includes the design, installation, maintenance through the '
+                 'season, takedown from January and off-season storage. A 25&#37; materials '
+                 'deposit holds your install date and covers the bulbs and cord cut for your '
+                 'roof; the balance is due once the lights are on.')
+
+# ---------------------------------------------------------------------------
+# FALL PORCH DECOR
+#
+# The other seasonal line, and deliberately the same shape as the lighting: it
+# cannot price off square footage either, so it does not go through the
+# estimator. The sale is a free design and three tiers priced off it, booked
+# through the same endpoint.
+#
+# It exists partly on its own merits and partly because it lands the customer
+# in front of us in SEPTEMBER, which is when the Christmas calendar needs
+# filling. Anyone who books both gets the fall display cleared on the same
+# visit the lights go up -- one trip for us, no bare porch for them.
+#
+# Same price rule as the lighting: a number here becomes "from $X", and
+# price=None becomes "Priced per property", so the page is always safe to
+# publish.
+# ---------------------------------------------------------------------------
+# How many porches we will take. It is a real cap, not a marketing one: fall
+# installs and the first Christmas light installs share October and the same
+# crew. Change this one number and the page changes everywhere.
+FALL_SLOTS = 30
+FALL_WINDOW = 'September 29 &ndash; October 31'
+
+# Three tiers, and the pumpkin count is the headline on each of them because
+# that is how this market is shopped -- competitors sell "22+ / 32+ / 44+" and
+# a customer comparing two quotes is counting. The counts below are what the
+# prices were built around, so moving one should move the other.
+FALL_PACKAGES = [
+    dict(
+        name='The Doorstep',
+        tag='22 pumpkins &middot; either side of the door',
+        price='349',
+        blurb='The pair of piles that flank the front door, built up out of real pumpkins with '
+              'mums and a bale behind them. It is the part of the house people photograph and '
+              'the part they walk past, and on most porches it is all you actually need.',
+        items=[
+            '<strong>22 pumpkins</strong> &mdash; 2 oversize to anchor each side of the door, '
+            '8 large and medium, and 12 minis and gourds',
+            '2 large mums in a color you pick &mdash; rust, burgundy, gold, cream or purple',
+            'A straw bale and a cornstalk bundle to build the height against',
+            'Designed for your own steps, delivered and arranged on the day',
+            'Taken away whenever you are ready to change the porch over',
+        ],
+    ),
+    dict(
+        name='The Full Porch',
+        tag='42 pumpkins &middot; door, steps and railings',
+        price='699',
+        popular=True,
+        badge='Most popular',
+        blurb='The display spills down the steps instead of stopping at the door. Twice the '
+              'pumpkins, white and heirloom varieties mixed in with the orange, and cornstalks '
+              'tied to the posts so the whole porch reads as one thing from the road.',
+        items=[
+            '<strong>42 pumpkins</strong> &mdash; 4 oversize, 12 large and medium, 6 specialty '
+            '(white ghost, blue, warty heirloom) and 20 minis and gourds',
+            '4 large mums, placed where the display meets the walkway',
+            '2 straw bales, 2 cornstalk bundles and ornamental corn for the posts',
+            'A mid-season visit to keep the whole display looking its best',
+            'Add lighting for $185 and the porch works after dark too',
+        ],
+    ),
+    dict(
+        name='The Whole Front',
+        tag='70 pumpkins &middot; lighting included',
+        price='1,199',
+        blurb='For a wide front, a double door, a long walk up, or a house that is going to be '
+              'photographed. The porch is the centerpiece and the display carries out to the '
+              'walkway and the beds &mdash; and this one is lit, so it still works at night.',
+        items=[
+            '<strong>70 pumpkins</strong> &mdash; 6 oversize including one true giant, 22 large '
+            'and medium, 12 specialty heirloom in blue, pink, green and white, and 30 minis '
+            'and gourds',
+            '6 large mums, in the beds as well as on the porch',
+            '3 straw bales, 3 cornstalk bundles and ornamental corn',
+            '<strong>Lighting included</strong> &mdash; mini lights through the display and '
+            'spotlights on it, both on a timer',
+            'Two mid-season visits, and a second area dressed if you would like one',
+        ],
+    ),
+]
+
+# The after-dark add-on. Deliberately just two things, both of which use kit we
+# already own and put up every Christmas -- the fine-wire mini LED we wrap
+# shrubs with, and ground spots. No roof lines here: a roof line is a full
+# lighting install and belongs on the lighting page, not bolted onto pumpkins.
+FALL_LIGHTING = [
+    ('&#10024;',
+     'Mini lights through the display',
+     'from $125',
+     'Warm white mini lights on fine wire, woven down through the pumpkins, the bale and the '
+     'cornstalks and run to an outdoor timer. It is the same wire we wrap shrubs with at '
+     'Christmas &mdash; it all but disappears in daylight, so what you see after dark is a lit '
+     'pile of pumpkins and not a string of lights lying on top of them.'),
+    ('&#128161;',
+     'Spotlights on the porch',
+     'from $95',
+     'One or two warm spotlights at ground level, throwing the display and the front of the '
+     'porch into relief so the whole thing still reads from the road at six in the evening. '
+     'Worth more than people expect on a house set back from the street, and it is what makes '
+     'the big pumpkins look big after dark.'),
+]
+
+FALL_LIGHT_HEAD = 'The porch after dark'
+
+FALL_LIGHT_LEAD = (
+    'By the end of October it is dark before most people get home, and a lit porch is the one '
+    'people slow down for. It is also the one you see from the car every evening on the way in, '
+    'which is really the point of the whole thing. Lighting is what we do all winter, so it is '
+    'the easiest thing in the world for us to add while we are there.')
+
+FALL_LIGHT_FOOT = (
+    'Add either to any package, or <strong>both together for $185</strong>. Both come included '
+    'in The Whole Front. The lights and the timer are ours, and they come away with the display '
+    'at the end of the season &mdash; so there is nothing to buy, nothing to store and nothing '
+    'to put out again next year. The timer takes care of switching on, which means the porch is '
+    'simply lit every evening without anybody thinking about it.')
+
+FALL_INCLUDED = [  # (icon, heading, body)
+    ('&#127875;',
+     'Designed for your porch, in your colors',
+     'Before we buy a thing we look at your steps &mdash; Street View, or a photo from your '
+     'phone. Your porch gets a display built to its own shape and scale, in the colors you '
+     'like: classic orange, soft cream and white, deep burgundy and rust, or something we put '
+     'together for you. You tell us what you love and we do the rest.'),
+    ('&#128666;',
+     'We bring every last thing',
+     'The pumpkins, the mums, the bales, the cornstalks, the gourds, the ornamental corn. All '
+     'of it sourced from growers, loaded, driven and carried up your steps by us. There is no '
+     'trip to the farm stand, no car full of pumpkins, and nothing for you to lift.'),
+    ('&#10024;',
+     'Built in an hour, while you get on with your day',
+     'Most displays are up inside an hour, and you do not need to be home for any of it. We '
+     'text you when we are on the way, and you come back to a porch that looks like somebody '
+     'spent the afternoon on it &mdash; because somebody did.'),
+    ('&#127810;',
+     'Looked after, then taken away when you say',
+     'We come back through the season to keep the display looking its best, and the takedown '
+     'is already in the price. You pick the day &mdash; right after Halloween, or keep it '
+     'through November while it still looks like fall &mdash; and the week after Thanksgiving '
+     'at the latest we collect every piece of it. Pumpkins go to compost, and the mums are '
+     'yours to keep and plant if you would like them.'),
+]
+
+FALL_FORM_CFG = dict(
+    label='Free porch design',
+    head='Ask for a porch design',
+    lead='Tell us when suits and how you would rather be reached. We design most porches '
+         'without setting foot on the property &mdash; from Street View, or from a couple of '
+         'photos of your own steps sent here &mdash; and come back to you with the display '
+         'laid out and priced. Say which colors you like and which you cannot stand.',
+    emailnote='"We will email you, and send the design to the same address."',
+    noteph='Steps, railings, dogs, gate code, HOA rules&hellip;',
+    extraval='Fall Porch: Commercial',
+    extraopt='Storefront or business',
+    photoleg='Photos of your porch and front steps',
+    photonote='Up to six. They are resized in your browser before they are sent, so they go '
+              'through quickly straight from your phone. One straight on and one from the '
+              'curb is plenty &mdash; we mainly need to see how wide the steps are and '
+              'what there is to build the display against.',
+    subject='fall porch design and quote',
+    btnicon='&#127875;',
+    btn='Request my porch design',
+    addrerr='Please give us the property address - the display is designed around your own steps.',
+)
+
+FALL_PKG_FOOT = ('Every package is designed for your porch, delivered, arranged on the day and '
+                 'taken away again when you are ready &mdash; the week after Thanksgiving at '
+                 'the latest. The price shown is where that size of display starts; what moves '
+                 'it is the width of the porch, the number of steps and how much of the front '
+                 'you want covered. A 50&#37; deposit books your install week and buys the '
+                 'pumpkins for it; the balance is due on the day it goes up.')
 
 # --------------------------------------------------------------------------
 # SERVICES
@@ -387,6 +590,130 @@ SERVICES = [
         ],
     ),
     dict(
+        slug='fall-porch',
+        nav='Fall Porch Decor',
+        h1=('FALL PORCH', 'DECORATING'),
+        title='Fall Porch Decorating &amp; Pumpkin Delivery in South Jersey',
+        desc='Fall porch decorating across South Jersey, from $349. A beautiful display of '
+             'pumpkins, mums, bales and cornstalks designed for your porch, delivered, built '
+             'and taken away again when you say. Free design, and nothing for you to do.',
+        image='fall-porch.jpg',
+        # Behind the hero text, under a scrim. Same treatment as the lighting
+        # page: show the thing before saying a word about it.
+        hero_image='fall-hero.jpg',
+        seasonal=True,
+        accent='fall',
+        theme='s-fall',
+        hero_btn=('#book', '&#127875; Ask for a free design'),
+        lead='A porch dressed for fall, and nothing for you to do. No trips to the farm '
+             'stand, no carrying pumpkins up the steps, and nothing to clear away when '
+             'the season is over. We design the display for your own home, bring every '
+             'piece, build it, look after it right through fall, and take it all away '
+             'again on the day you choose. You pull into the driveway and enjoy it.',
+        body=[
+            ('A porch worth pulling up to', [
+                'There is a real difference between a few pumpkins by the door and a porch that '
+                'looks designed, and it comes down to abundance and variety. A pair of '
+                'genuinely oversize pumpkins low down to anchor each side. A dozen more stacked '
+                'in behind them at different heights so the whole thing has depth. White, blue '
+                'and heirloom varieties broken into the orange so the color moves. Minis and '
+                'gourds spilling down the treads to carry your eye to the door.',
+                'That is what we build, and we build it to your house &mdash; the width of your '
+                'steps, the color of your front door, the way the light falls on it in the '
+                'afternoon. The result is the porch on the street that people slow down for, '
+                'and the one your family walks past every day for two months.',
+                'It is also the backdrop for every photograph anybody takes at your house '
+                'between now and Thanksgiving, which is worth more than people expect.',
+            ]),
+            ('Nothing for you to do, start to finish', [
+                'Booking takes a few minutes and a couple of photos. After that the whole thing '
+                'is ours: choosing the pumpkins, sourcing the mums in the shade you picked, '
+                'loading the truck, driving it, carrying it up your steps and arranging it.',
+                'You do not need to be home and you do not need to move your car. We text you '
+                'when we are on the way, the display goes up in about an hour, and it is there '
+                'when you get back. Nothing gets delivered to your driveway for you to deal '
+                'with later, and you are never left with a job half done.',
+                'Then at the end of the season we come and take all of it away, on a day you '
+                'choose. That part is already in the price, so there is nothing to arrange, '
+                'nothing to haul out to the curb and nothing to find room for in the garage.',
+            ]),
+            ('Real pumpkins, mums, bales and cornstalks', [
+                'Everything comes from growers, and the mix is what makes a display look '
+                'considered. Oversize field pumpkins give it weight at the bottom. Large and '
+                'medium jack varieties build the height. White ghost pumpkins, blue Jarrahdale, '
+                'green and warty heirlooms give the color somewhere to go, and minis and '
+                'ornamental gourds fill in and run down the steps.',
+                'Mums are the color you see from the road, so they go where the display meets '
+                'the walkway. We buy large, hardy garden mums in full bud, which is what keeps '
+                'them coming into flower right through the season. Rust, burgundy, gold, cream '
+                'and purple all look wonderful &mdash; pick a favorite, or leave it to us.',
+                'Straw bales give the display depth, lifting the back of each pile so it has '
+                'shape rather than sitting flat against the house. And cornstalks give it '
+                'height: tied to a column, a porch post or a lamp post, they are what makes a '
+                'display scale up to a tall front and finish the whole thing off.',
+            ]),
+            ('Up any week in October, and it runs to Thanksgiving', [
+                'Displays go up from the last week of September right through to the end of '
+                'October, so you can have it whenever suits you &mdash; in time for the first '
+                'pumpkin patch weekend, in time for the school photographs, or in time for '
+                'trick-or-treat. Book early and you get the pick of the dates; we only take %d '
+                'porches, so the calendar closes when it closes.' % FALL_SLOTS,
+                'Thanksgiving falls on November 26 this year, which is as late as it ever gets. '
+                'That makes for a long, generous season: even a display that goes up on the '
+                'last day of October has a full four weeks to stand, and one that goes up at '
+                'the start of the month is there for the best part of two.',
+                'Pick the week that suits you when you book, and we will confirm the day. If '
+                'you have people coming for a particular weekend, tell us and we will have it '
+                'up in good time.',
+                'Takedown works the same way: you say when, and we confirm the day rather than '
+                'just turning up. Some people like the porch clear the morning after Halloween. '
+                'Plenty keep it right through November, because a porch full of pumpkins and '
+                'cornstalks still looks like fall long after the costumes are put away. The '
+                'The week after Thanksgiving is the latest we collect &mdash; the start of '
+                'December this year &mdash; which is usually exactly when you want the porch '
+                'ready for Christmas.',
+            ]),
+            ('Storefronts, offices and business entrances', [
+                'The same job at a different scale, and it reads as effort in a way a printed '
+                'sign never does. Shop fronts, restaurant entrances, real estate offices and '
+                'dealership doors are all worth doing, and a commercial display usually wants '
+                'building bigger and bolder because it is being seen from a road rather than '
+                'from a front walk.',
+                'Tell us on the form if there is a property manager or an approval chain and we '
+                'will put the proposal in whatever format they need.',
+            ]),
+        ],
+        scarcity=('Only %d porches this season' % FALL_SLOTS,
+                  'Installs run ' + FALL_WINDOW),
+        packages=FALL_PACKAGES,
+        lighting=(FALL_LIGHTING, FALL_LIGHT_HEAD, FALL_LIGHT_LEAD, FALL_LIGHT_FOOT),
+        pkg_label='Three sizes of porch',
+        pkg_points=['Designed for your home',
+                    'Setup and removal included',
+                    'Stress-free &mdash; we handle design, setup, and takedown'],
+        pkg_foot=FALL_PKG_FOOT,
+        pkg_prefix='Fall Porch: ',
+        included=FALL_INCLUDED,
+        form=FALL_FORM_CFG,
+        crosspromo=dict(
+            href='christmas-lights.html', icon='&#127876;',
+            kicker='Book both and save',
+            head='One porch, two seasons',
+            body='Christmas installs start in October, while your fall display is still up, and '
+                 'the latest we take the pumpkins away is the week after Thanksgiving &mdash; '
+                 'which is exactly when most people want their lights on. Book both and we '
+                 'clear the fall display on the same visit, so the porch goes straight from one '
+                 'season to the next with nothing in between. One trip instead of two, and '
+                 '<strong>$100 off the lighting</strong>.',
+            link='See the lighting packages'),
+        cta_head='Have the best porch on the street this fall',
+        cta='Ask for a design and tell us how you would rather talk &mdash; text, email, phone '
+            'or in person. We lay the display out for your own steps, price it, and hold your '
+            'install week. Nothing is due until you pick a package, and everything after that '
+            'is ours to worry about: we bring it, we build it, we look after it, and we take '
+            'it all away again on the day you choose.',
+    ),
+    dict(
         slug='christmas-lights',
         nav='Christmas Lights',
         h1=('CHRISTMAS LIGHT', 'INSTALLATION'),
@@ -483,8 +810,19 @@ SERVICES = [
             ]),
         ],
         packages=XMAS_PACKAGES,
+        pkg_foot=XMAS_PKG_FOOT,
         included=XMAS_INCLUDED,
-        form=True,
+        form=XMAS_FORM_CFG,
+        crosspromo=dict(
+            href='fall-porch.html', icon='&#127875;',
+            kicker='Before the lights go up',
+            head='Your front porch does not have to wait until December',
+            body='We dress porches for fall as well &mdash; real pumpkins, mums, straw bales '
+                 'and cornstalks, arranged on your steps in early October and lit if you want '
+                 'them. The latest we clear it away is the week after Thanksgiving, so book '
+                 'both and the pumpkins go on the same visit your lights go up: the porch '
+                 'changes season in one trip, and you get <strong>$100 off the lighting</strong>.',
+            link='See the fall porch packages'),
         gallery=[
             ('christmas-roofline.jpg',
              'Warm white C9 bulbs outlining every peak and gable of a two-story house at dusk',
@@ -543,6 +881,11 @@ CARDS = {
     'add-on-services': ('✨', 'Add-On Services', 'Bundle &amp; Save',
         'Outdoor furniture, awnings and trash cans, added to any job. Bundling means one visit '
         'instead of two, and the bigger the job the better the rate.'),
+    'fall-porch': ('\U0001F383', 'Fall Porch Decor', 'Seasonal',
+        'A beautiful display of pumpkins, mums, straw bales and cornstalks, designed for your '
+        'own steps and built on them any week in October, lit if you would like it. We bring '
+        'it, we '
+        'build it, we look after it and we take it all away again on the day you choose.'),
     'christmas-lights': ('\U0001F384', 'Christmas Lights', 'Seasonal',
         'Designed on a photo of your own house, installed in commercial-grade LED, '
         'maintained all season, taken down when you are ready and stored until next year. The '
@@ -809,6 +1152,7 @@ ALTS = {
     'gutter-cleaning': 'A gutter full of leaves beside the same gutter cleared out',
     'window-cleaning': 'Clean windows reflecting the sky on a two story house',
     'add-on-services': 'A cleaned wicker patio furniture set',
+    'fall-porch': 'A front porch stacked with pumpkins, mums, straw bales and cornstalks in fall',
     'christmas-lights': 'A house roof line and front trees lit with warm white Christmas bulbs at night',
 }
 
@@ -896,7 +1240,22 @@ def json_ld(obj):
             + '</script>')
 
 
-def head(title, desc, canonical, image, ld):
+def asset_v():
+    """A short stamp appended to the stylesheet links, so a browser that is
+    holding the old CSS picks up the new one the moment the site is deployed
+    rather than whenever it feels like revalidating. Both stylesheets are
+    generated -- page.css from PAGE_CSS here, site.css from CSS_ADD in
+    seo_home.py -- so hashing those two sources changes the stamp exactly when
+    the CSS actually changes, and not on every build."""
+    h = hashlib.sha1(PAGE_CSS.encode('utf-8'))
+    try:
+        h.update(open('seo_home.py', 'rb').read())
+    except OSError:
+        pass          # still produces a usable stamp from PAGE_CSS alone
+    return h.hexdigest()[:8]
+
+
+def head(title, desc, canonical, image, ld, body_class=''):
     return '\n'.join([
         '<!DOCTYPE html>',
         '<html lang="en">',
@@ -915,11 +1274,11 @@ def head(title, desc, canonical, image, ld):
         '<meta name="twitter:card" content="summary_large_image">',
         '<link rel="preconnect" href="https://fonts.googleapis.com">',
         '<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">',
-        '<link rel="stylesheet" href="css/site.css">',
-        '<link rel="stylesheet" href="css/page.css">',
+        '<link rel="stylesheet" href="css/site.css?v=%s">' % asset_v(),
+        '<link rel="stylesheet" href="css/page.css?v=%s">' % asset_v(),
         json_ld(ld),
         '</head>',
-        '<body>',
+        '<body%s>' % (' class="%s"' % body_class if body_class else ''),
     ])
 
 
@@ -927,12 +1286,16 @@ TAIL = ('<script>function toggleMenu(){const m=document.getElementById("mob-menu
         'm.classList.toggle("open")}</script>\n</body>\n</html>')
 
 
-def prose(sections):
+def prose(sections, blocks=False):
     out = []
     for heading, paras in sections:
+        if blocks:
+            out.append('    <div class="pblock">')
         out.append('    <h2>%s</h2>' % html.escape(heading))
         for p in paras:
             out.append('    <p>%s</p>' % p)
+        if blocks:
+            out.append('    </div>')
     return '\n'.join(out)
 
 
@@ -974,17 +1337,21 @@ def price_label(pkg):
     return 'from $%s' % pkg['price'] if pkg.get('price') else 'Priced per property'
 
 
-def packages_html(pkgs):
+def packages_html(pkgs, label='Three ways to do it', foot=None, accent='', points=None):
     if not pkgs:
         return ''
-    out = ['<section class="pkg-wrap">',
-           '  <div class="section-label">Three ways to do it</div>',
-           '  <div class="pkgs">']
+    out = ['<section class="pkg-wrap%s">' % (' ' + accent if accent else ''),
+           '  <div class="section-label">%s</div>' % html.escape(label)]
+    if points:
+        out.append('  <ul class="pkg-points">')
+        out += ['    <li>%s</li>' % x for x in points]
+        out.append('  </ul>')
+    out.append('  <div class="pkgs">')
     for p in pkgs:
         out.append('    <div class="%s">' % ('pkg pop' if p.get('popular') else 'pkg'))
         if p.get('badge'):
             out.append('      <span class="pkg-badge">%s</span>' % html.escape(p['badge']))
-        out.append('      <div class="pkg-tag">%s</div>' % html.escape(p['tag']))
+        out.append('      <div class="pkg-tag">%s</div>' % p['tag'])
         out.append('      <h3>%s</h3>' % html.escape(p['name']))
         out.append('      <div class="pkg-price">%s</div>' % price_label(p))
         out.append('      <p>%s</p>' % p['blurb'])
@@ -994,20 +1361,52 @@ def packages_html(pkgs):
         out.append('      </ul>')
         out.append('      <a href="#book" class="pkg-cta">Get this priced &rarr;</a>')
         out.append('    </div>')
-    out += ['  </div>',
-            '  <p class="pkg-foot">Every package includes the design, installation, '
-            'maintenance through the season, takedown from January and off-season storage. '
-            'A 25&#37; materials deposit holds your install date and covers the bulbs and '
-            'cord cut for your roof; the balance is due once the lights are on.</p>',
-            '</section>']
+    out += ['  </div>']
+    if foot:
+        out.append('  <p class="pkg-foot">%s</p>' % foot)
+    out.append('</section>')
     return '\n'.join(out)
+
+
+def scarcity_html(s):
+    if not s.get('scarcity'):
+        return ''
+    a, b = s['scarcity']
+    return ('<section class="scarce-wrap">\n'
+            '  <div class="scarce"><span class="scarce-dot"></span>'
+            '<span>%s</span><span class="scarce-sep">&middot;</span>'
+            '<span>%s</span></div>\n'
+            '</section>' % (a, b))
+
+
+def lighting_html(items, head, lead, foot):
+    """The fall page's after-dark block. It is its own section rather than a
+    fourth package because it is an add-on to any of them -- and because the
+    bulb-swap line underneath it is the whole reason this is worth selling."""
+    rows = '\n'.join(
+        '    <div class="lit-row"><div class="lit-ico">%s</div><div>'
+        '<h3>%s <span class="lit-price">%s</span></h3><p>%s</p></div></div>'
+        % (ico, html.escape(name), price, body)
+        for ico, name, price, body in items)
+    return ('<section class="lit-wrap">\n'
+            '  <div class="section-label">After dark</div>\n'
+            '  <h2 class="lit-head">%s</h2>\n'
+            '  <p class="lit-lead">%s</p>\n'
+            '  <div class="lits">\n' + rows + '\n  </div>\n'
+            '  <p class="lit-foot">%s</p>\n'
+            '</section>') % (html.escape(head), lead, foot)
 
 
 def included_html(items):
     if not items:
         return ''
-    rows = '\n'.join('    <div class="inc"><h3>%s</h3><p>%s</p></div>' % (html.escape(h), b)
-                     for h, b in items)
+    rows = []
+    for it in items:
+        ico, h, b = it if len(it) == 3 else ('', it[0], it[1])
+        rows.append('    <div class="inc">%s<h3>%s</h3><p>%s</p></div>'
+                    % ('<div class="inc-ico">%s</div>' % ico if ico else '',
+                       html.escape(h), b))
+    rows = '\n'.join(rows)
     return ('<section style="background:var(--foam)">\n'
             '  <div class="section-label">What every package includes</div>\n'
             '  <div class="incs">\n' + rows + '\n  </div>\n</section>')
@@ -1023,14 +1422,11 @@ def booking_url():
     return m.group(1)
 
 
-XMAS_FORM = r"""<section class="xbook" id="book">
+SEASON_FORM = r"""<section class="xbook" id="book">
   <div class="xbook-in">
-    <div class="xlabel xb-lab">Free consultation</div>
-    <h2>Ask for a consultation</h2>
-    <p class="xb-lead">Tell us when suits and how you would rather be reached. Most designs are
-      drawn without us setting foot on the property &mdash; from Street View, or from a couple of
-      photos you send us here. We come out in person when the house is awkward to see, or when
-      you would simply rather we did.</p>
+    <div class="xlabel xb-lab">__F_LABEL__</div>
+    <h2>__F_HEAD__</h2>
+    <p class="xb-lead">__F_LEAD__</p>
 
     <div class="xb-grid">
       <label>Your name<input id="x-name" type="text" autocomplete="name"></label>
@@ -1059,16 +1455,14 @@ XMAS_FORM = r"""<section class="xbook" id="book">
       <label>Roughly what you have in mind<select id="x-pkg">
         <option value="">Not sure yet &mdash; show me the options</option>
 __OPTS__
-        <option value="Commercial">Commercial property</option>
+        <option value="__F_EXTRAVAL__">__F_EXTRAOPT__</option>
       </select></label>
-      <label>Anything we should know<input id="x-note" type="text" placeholder="Steep roof, dogs, gate code, HOA rules&hellip;"></label>
+      <label>Anything we should know<input id="x-note" type="text" placeholder="__F_NOTEPH__"></label>
     </div>
 
     <div class="xb-block">
-      <div class="xb-legend">Photos of the front of the house <span>optional, and it speeds everything up</span></div>
-      <p class="xb-note">Up to six. They are resized in your browser before they are sent, so a
-        poor signal is not a problem. If we cannot see the house well enough from these or from
-        Street View, we will arrange to come out.</p>
+      <div class="xb-legend">__F_PHOTOLEG__ <span>optional, and it speeds everything up</span></div>
+      <p class="xb-note">__F_PHOTONOTE__</p>
       <label class="xb-drop" id="x-drop">
         <input id="x-files" type="file" accept="image/*" multiple>
         <span>&#128247; Choose photos</span>
@@ -1076,12 +1470,12 @@ __OPTS__
       <div class="xb-thumbs" id="x-thumbs"></div>
     </div>
 
-    <label class="__CONSENT__"><input type="checkbox" id="x-sms"><span>Text me about my holiday lighting consultation and quote with __LEGAL__. These are service messages about my own job.</span></label>
+    <label class="__CONSENT__"><input type="checkbox" id="x-sms"><span>Text me about my __F_SUBJECT__ with __LEGAL__. These are service messages about my own job.</span></label>
     <label class="__CONSENT__"><input type="checkbox" id="x-smsm"><span>Separately, text me occasional service offers and seasonal specials from __LEGAL__. These are marketing messages.</span></label>
     <p class="__FINE__">Both boxes are optional and independent &mdash; you can ask for a consultation without ticking either, and we will call or email you instead. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. <a href="__PRIVACY__" target="_blank">Privacy Policy</a> <span>&middot;</span> <a href="__SMSTERMS__" target="_blank">Text Message Terms</a></p>
 
     <div class="xb-err" id="x-err"></div>
-    <button class="xb-go" id="x-go">&#127876; Request my consultation</button>
+    <button class="xb-go" id="x-go">__F_BTNICON__ __F_BTN__</button>
     <div class="xb-prog" id="x-prog"></div>
 
     <div class="xb-ok" id="x-ok">
@@ -1119,7 +1513,7 @@ __OPTS__
   // ---- how they want to be reached
   var NOTES={
     "Text":"We will text you to talk it through.",
-    "Email":"We will email you, and send the design to the same address.",
+    "Email":__F_EMAILNOTE__,
     "Phone call":"We will call you at the time you picked.",
     "In person":"We will come out and look at the house with you."
   };
@@ -1186,7 +1580,7 @@ __OPTS__
     var p=tidy(g("x-phone").value), a=tidy(g("x-addr").value);
     err.textContent=""; prog.textContent="";
     if(!n){err.textContent="Please give us your name.";return}
-    if(!a){err.textContent="Please give us the property address - the design is drawn on a picture of it.";return}
+    if(!a){err.textContent="__F_ADDRERR__";return}
     if(!e&&!p){err.textContent="Please leave an email address or a phone number.";return}
     if((method==="Text"||method==="Phone call")&&!p){err.textContent="You asked to be reached by "+method.toLowerCase()+", so we need a phone number.";return}
     if(method==="Email"&&!e){err.textContent="You asked to be reached by email, so we need an email address.";return}
@@ -1228,36 +1622,69 @@ __OPTS__
       g("x-ok").scrollIntoView({behavior:"smooth",block:"center"});
     }catch(ex){
       err.textContent=ex.message+" - call us on __PHONE__ and we will take it down by hand.";
-      this.disabled=false; this.innerHTML="&#127876; Request my consultation";
+      this.disabled=false; this.innerHTML="__F_BTNICON__ __F_BTN__";
     }
   });
 })();
 </script>"""
 
 
-def xmas_form_html(pkgs):
+def season_form_html(pkgs, f, prefix=''):
     """Asks for a consultation through the same endpoint as every other
-    booking, so a lighting lead lands in the CRM with the alert and the
+    booking, so a seasonal lead lands in the CRM with the alert and the
     follow-up exactly like a wash booking does. It is a REQUEST, not a
     booking: nothing goes on the calendar, and photos the customer sends go
     to a Drive folder linked from the lead row. See the HOLIDAY section of
-    the booking project for what happens at the other end."""
+    the booking project for what happens at the other end.
+
+    Both seasonal pages post the same `holidayLead` action, so the fall
+    packages are prefixed in the dropdown value -- that is what tells a fall
+    porch lead from a lighting lead in the CRM's holiday view, with no change
+    needed at the booking end."""
     opts = '\n'.join(
         '        <option value="%s">%s &mdash; %s</option>'
-        % (html.escape(p['name'], quote=True), html.escape(p['name']), html.escape(p['tag']))
+        % (html.escape(prefix + p['name'], quote=True),
+           html.escape(p['name']), html.escape(p['tag']))
         for p in pkgs)
-    return (XMAS_FORM
-            .replace('__OPTS__', opts)
-            .replace('__LEGAL__', BIZ)
-            .replace('__EMAIL__', EMAIL)
-            .replace('__E164__', PHONE_E164)
-            .replace('__PHONE__', PHONE_PRETTY)
-            .replace('__BRAND__', BRAND_KEY)
-            .replace('__CONSENT__', 'sms-opt')
-            .replace('__FINE__', 'sms-fine')
-            .replace('__PRIVACY__', 'privacy.html')
-            .replace('__SMSTERMS__', 'sms-terms.html')
-            .replace('__URL__', booking_url()))
+    out = (SEASON_FORM
+           .replace('__OPTS__', opts)
+           .replace('__LEGAL__', BIZ)
+           .replace('__EMAIL__', EMAIL)
+           .replace('__E164__', PHONE_E164)
+           .replace('__PHONE__', PHONE_PRETTY)
+           .replace('__BRAND__', BRAND_KEY)
+           .replace('__CONSENT__', 'sms-opt')
+           .replace('__FINE__', 'sms-fine')
+           .replace('__PRIVACY__', 'privacy.html')
+           .replace('__SMSTERMS__', 'sms-terms.html')
+           .replace('__URL__', booking_url()))
+    for k, v in f.items():
+        out = out.replace('__F_%s__' % k.upper(), v)
+    if '__F_' in out:
+        raise SystemExit('!! season form left a token unfilled: %s'
+                         % out[out.index('__F_'):out.index('__F_') + 40])
+    return out
+
+
+def crosspromo(c):
+    """The band that sends the fall page at the Christmas page and back again.
+    The two seasons share one customer, one front door and -- for anyone who
+    books both -- one visit, since the fall display comes away on the same
+    trip the lights go up."""
+    if not c:
+        return ''
+    return ('<section class="xsell-wrap">\n'
+            '  <a class="xsell" href="%s">\n'
+            '    <div class="xsell-ico">%s</div>\n'
+            '    <div class="xsell-txt">\n'
+            '      <div class="xsell-kick">%s</div>\n'
+            '      <h3>%s</h3>\n'
+            '      <p>%s</p>\n'
+            '      <span class="xsell-go">%s &rarr;</span>\n'
+            '    </div>\n'
+            '  </a>\n'
+            '</section>' % (c['href'], c['icon'], html.escape(c['kicker']),
+                            html.escape(c['head']), c['body'], html.escape(c['link'])))
 
 
 def linkgrid(title, items):
@@ -1285,7 +1712,7 @@ def build_service(s):
          'areaServed': [{'@type': 'City', 'name': t['name']} for t in TOWNS]},
     ]}
     parts = [
-        head(s['title'], s['desc'], canonical, s['image'], ld),
+        head(s['title'], s['desc'], canonical, s['image'], ld, s.get('theme', '')),
         NAV, MOB,
         hero_open,
         '  <div class="crumb"><a href="index.html">Home</a> &rsaquo; %s</div>' % html.escape(s['nav']),
@@ -1296,14 +1723,19 @@ def build_service(s):
         '    <a href="tel:%s" class="btn-outline">&#128222; %s</a>' % (PHONE_E164, PHONE_PRETTY),
         '  </div>',
         '</section>',
+        scarcity_html(s),
+        packages_html(s.get('packages'), s.get('pkg_label', 'Three ways to do it'),
+                      s.get('pkg_foot'), s.get('accent', ''), s.get('pkg_points')),
+        lighting_html(*s['lighting']) if s.get('lighting') else '',
         '<section>',
-        '  <div class="prose">',
-        prose(s['body']),
+        '  <div class="%s">' % ('prose cols' if s.get('packages') else 'prose'),
+        prose(s['body'], blocks=bool(s.get('packages'))),
         '  </div>',
         '</section>',
-        packages_html(s.get('packages')),
         included_html(s.get('included')),
-        xmas_form_html(s['packages']) if s.get('form') else '',
+        crosspromo(s.get('crosspromo')),
+        season_form_html(s['packages'], s['form'], s.get('pkg_prefix', ''))
+        if s.get('form') else '',
         figures(s.get('gallery')),
         linkgrid('Other services', [x for x in SERVICE_LINKS if x[0] != s['slug'] + '.html']),
         linkgrid('Towns we cover', TOWN_LINKS),
@@ -1383,6 +1815,16 @@ PAGE_CSS = """/* Layout for the service and town pages. The palette, type and bu
 .prose h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.5rem,3.4vw,2rem);font-weight:800;color:var(--ink);margin:38px 0 12px;line-height:1.15}
 .prose h2:first-child{margin-top:0}
 .prose p{color:#556;line-height:1.85;margin-bottom:15px;font-weight:300}
+/* Two-column explanation, used only on the pages that lead with prices. Real
+   CSS columns rather than a grid, so the text flows down one column and into
+   the next instead of leaving a ragged row whenever two topics differ in
+   length; break-inside keeps a heading with its own paragraphs. */
+.prose.cols{max-width:none;column-count:2;column-gap:50px}
+.prose.cols .pblock{break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:26px}
+.prose.cols .pblock h2{margin-top:0;font-size:clamp(1.22rem,2.3vw,1.48rem);margin-bottom:9px}
+.prose.cols p{font-size:.915rem;line-height:1.78;margin-bottom:12px}
+.prose.cols .pblock:last-child{margin-bottom:0}
+@media(max-width:880px){.prose.cols{column-count:1}}
 .linkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px;margin-top:18px}
 .linkgrid a{display:block;padding:12px 15px;background:var(--white);border:1.5px solid #dfe8e6;border-radius:9px;color:var(--ocean);text-decoration:none;font-weight:700;font-size:.9rem;transition:all .18s}
 .linkgrid a:hover{border-color:var(--sky);color:var(--ink);transform:translateY(-1px)}
@@ -1400,6 +1842,44 @@ PAGE_CSS = """/* Layout for the service and town pages. The palette, type and bu
    page about lights that is entirely sea-green reads as a washing page. It is
    scoped to these blocks and never leaks into the rest of the site. */
 .pkg-wrap{--gold:#e0a83c}
+/* The fall page runs the same blocks on a pumpkin accent rather than a bulb gold. */
+.pkg-wrap.fall{--gold:#c2611f}
+
+/* ---- Fall porch page palette -------------------------------------------
+   The whole site is drawn from five custom properties, so a seasonal page
+   gets its own look by re-pointing those five rather than restating a
+   single rule. body.s-fall turns the page autumn; the nav, the mobile menu
+   and the footer are pinned straight back to the brand colors, because the
+   furniture should not change color from one page to the next. The two
+   hand-written gradients (the hero and the after-dark block) name their
+   colors directly, so those are the only two that need spelling out. */
+body.s-fall{--ink:#1d1206;--ocean:#a8551b;--sky:#edab45;--foam:#fdf2e3;--sand:#faf3e8}
+body.s-fall nav,body.s-fall #mob-menu,body.s-fall footer{--ink:#0f1a1f;--ocean:#1b6b72;--sky:#4fd1a5;--foam:#e6f4f1;--sand:#f5f3ee}
+body.s-fall .sub-hero{background:linear-gradient(160deg,#1d1206 0%,#4a2410 54%,#8d4616 100%)}
+/* The hero photo is bright daylight rather than the lighting page's night
+   shots, so the scrim is both warmer and heavier on the left where the text
+   sits. The photo is already cropped tight, so it is centered rather than
+   pulled down to 62%. */
+body.s-fall .sub-hero.has-photo{background-position:center center}
+body.s-fall .sub-hero.has-photo:before{background:linear-gradient(95deg,rgba(26,15,6,.94) 0%,rgba(26,15,6,.91) 44%,rgba(30,17,7,.74) 74%,rgba(40,22,9,.4) 100%)}
+@media(max-width:720px){body.s-fall .sub-hero.has-photo:before{background:linear-gradient(180deg,rgba(26,15,6,.9),rgba(30,17,7,.9))}}
+body.s-fall .btn-primary:hover{box-shadow:0 8px 24px rgba(237,171,69,.42)}
+body.s-fall .lit-wrap{background:linear-gradient(160deg,#241607,#17100a 58%,#32190a)}
+
+/* Festive touches, all from one drawing, held in a custom property so the
+   pumpkin is defined once and inherited by everything that wants it. */
+body.s-fall{--pumpkin:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 6.2c-.6-.6-1.4-1-2.3-1C5.5 5.2 3.7 7.4 3.7 10.1s1.8 4.9 4 4.9c.9 0 1.7-.4 2.3-1 .6.6 1.4 1 2.3 1 2.2 0 4-2.2 4-4.9s-1.8-4.9-4-4.9c-.9 0-1.7.4-2.3 1z' fill='%23c2611f'/%3E%3Cpath d='M10 6.2V4.4c0-.8.7-1.5 1.5-1.5' fill='none' stroke='%234e7c33' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pkg-wrap.fall .pkg li:before{background:var(--pumpkin) center/contain no-repeat;border-radius:0;width:15px;height:15px;left:0;top:.28em}
+.pkg-wrap.fall .pkg li{padding-left:24px}
+body.s-fall .scarce-dot{width:17px;height:17px;border-radius:0;background:var(--pumpkin) center/contain no-repeat}
+
+/* The three things worth knowing before anyone reads a package, sat directly
+   under the section label so they are read on the way to the prices. */
+.pkg-points{list-style:none;padding:0;margin:13px 0 6px;display:flex;flex-wrap:wrap;gap:11px 36px}
+.pkg-points li{position:relative;padding-left:27px;font-size:1.02rem;font-weight:700;color:var(--ink);letter-spacing:.2px;line-height:1.4}
+.pkg-points li:before{content:"";position:absolute;left:0;top:.14em;width:18px;height:18px;background:var(--pumpkin) center/contain no-repeat}
+@media(max-width:700px){.pkg-points{flex-direction:column;gap:10px;margin-bottom:2px}.pkg-points li{font-size:.97rem}}
+.inc-ico{font-size:1.7rem;line-height:1;margin-bottom:11px}
 .pkgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px;align-items:start}
 .pkg{position:relative;background:var(--white);border:1.5px solid #dfe8e6;border-radius:14px;padding:26px 24px 24px;display:flex;flex-direction:column}
 .pkg.pop{border-color:var(--gold);box-shadow:0 10px 34px rgba(224,168,60,.16)}
@@ -1413,6 +1893,44 @@ PAGE_CSS = """/* Layout for the service and town pages. The palette, type and bu
 .pkg li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .pkg-cta{margin-top:auto;display:inline-block;font-weight:700;font-size:.9rem;color:var(--ocean);text-decoration:none}
 .pkg-cta:hover{color:var(--ink)}
+
+
+/* The season cap. It is a real constraint - fall installs and the first
+   Christmas installs share October - so it gets stated plainly
+   rather than dressed up as a countdown. */
+.scarce-wrap{padding-bottom:0}
+.scarce{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;background:#fdf3e6;border:1.5px solid #ecd4b0;border-radius:99px;padding:11px 24px;margin:0 auto;width:fit-content;max-width:100%;font-size:.88rem;font-weight:700;color:#8c4a12;letter-spacing:.3px;text-align:center}
+.scarce-dot{width:8px;height:8px;border-radius:50%;background:#c2611f;flex:0 0 auto}
+.scarce-sep{color:#d6b184}
+@media(max-width:520px){.scarce{flex-direction:column;gap:3px;border-radius:14px;padding:11px 18px;font-size:.84rem;line-height:1.4}.scarce-sep{display:none}.scarce-dot{display:none}}
+
+/* After-dark block on the fall page. Dark, because it is about what the porch
+   looks like at night and a cream panel makes that point badly. */
+.lit-wrap{background:linear-gradient(160deg,#13323a,#0e2830 60%,#1a2b22);color:#fff}
+.lit-wrap .section-label{color:#e8a84a}
+.lit-head{font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.9rem,4.2vw,2.6rem);font-weight:900;color:#fff;line-height:1.08;margin:6px 0 12px;letter-spacing:.5px}
+.lit-lead{color:rgba(255,255,255,.72);line-height:1.8;font-weight:300;max-width:66ch;margin-bottom:28px}
+.lits{display:grid;gap:16px;margin-bottom:26px}
+.lit-row{display:flex;gap:16px;align-items:flex-start;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:19px 21px}
+.lit-ico{font-size:1.5rem;line-height:1;flex:0 0 auto;margin-top:2px}
+.lit-row h3{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:.4px;margin-bottom:6px;line-height:1.15}
+.lit-price{display:inline-block;background:rgba(224,168,60,.16);border:1px solid rgba(224,168,60,.35);color:#f0c274;border-radius:99px;padding:2px 11px;font-family:'Inter',system-ui,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.3px;margin-left:8px;vertical-align:middle;white-space:nowrap}
+.lit-row p{color:rgba(255,255,255,.7);line-height:1.72;font-weight:300;font-size:.93rem;margin:0}
+.lit-row p strong{color:#f0c274;font-weight:700}
+.lit-foot{color:rgba(255,255,255,.78);line-height:1.8;font-weight:300;font-size:.97rem;max-width:72ch;border-top:1px solid rgba(255,255,255,.13);padding-top:22px}
+.lit-foot strong{color:#fff;font-weight:700}
+@media(max-width:560px){.lit-row{flex-direction:column;gap:9px;padding:17px 18px}.lit-price{margin-left:0;display:block;width:fit-content;margin-top:6px}}
+.xsell-wrap{padding-top:0}
+.xsell{display:flex;gap:20px;align-items:flex-start;text-decoration:none;background:linear-gradient(105deg,#fff8ec,#fdf1e2 60%,#f7ece2);border:1.5px solid #ecd9bd;border-radius:16px;padding:26px 28px;transition:border-color .18s,box-shadow .18s,transform .18s}
+.xsell:hover{border-color:#d9b47a;box-shadow:0 12px 32px rgba(150,100,30,.13);transform:translateY(-2px)}
+.xsell-ico{font-size:2.3rem;line-height:1;flex:0 0 auto;margin-top:2px}
+.xsell-kick{font-size:.7rem;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#a8681d}
+.xsell h3{font-family:'Barlow Condensed',sans-serif;font-size:1.75rem;font-weight:900;color:var(--ink);line-height:1.1;margin:5px 0 9px;letter-spacing:.4px}
+.xsell p{color:#5a5147;line-height:1.75;font-weight:300;font-size:.95rem;margin:0 0 13px;max-width:62ch}
+.xsell p strong{font-weight:700;color:#8c4a12}
+.xsell-go{font-weight:700;font-size:.9rem;color:var(--ocean)}
+.xsell:hover .xsell-go{color:var(--ink)}
+@media(max-width:560px){.xsell{flex-direction:column;gap:12px;padding:22px 20px}.xsell-ico{font-size:2rem}}
 .pkg-foot{max-width:720px;margin-top:22px;color:#667;font-size:.88rem;line-height:1.75;font-weight:300}
 .incs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px;margin-top:18px}
 .inc h3{font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:800;color:var(--ink);margin-bottom:7px;line-height:1.15}
@@ -1741,6 +2259,11 @@ def main():
 
     open('robots.txt', 'w', encoding='utf-8', newline='\r\n').write(
         'User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n' % SITE)
+
+    missing = sorted({s['image'] for s in SERVICES
+                      if not os.path.exists(os.path.join('img', s['image']))})
+    for m in missing:
+        print('!! img/%s does not exist - that page has a broken og:image' % m)
 
     print('generated %d pages:' % len(written))
     for f in written:

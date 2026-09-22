@@ -115,30 +115,36 @@ a.svc-card:hover .svc-more .arw{transform:translateX(5px)}
    and one z-index below it; if the CRM promo is switched on as well, the
    pricing script drops this one underneath so the two stack instead of
    overlapping. Deliberately not a discount bar - it is a link to the page. */
-.xmas-bar{display:block;background:linear-gradient(90deg,#7d1c1c,#b3302a 45%,#d99a2b);padding:9px 5%;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:.5px;text-decoration:none;position:fixed;top:64px;left:0;right:0;z-index:998;transition:filter .18s}
-.xmas-bar:hover{filter:brightness(1.09)}
-.xmas-bar span{background:rgba(0,0,0,.22);border-radius:4px;padding:2px 9px;margin-left:10px;font-size:.9rem;letter-spacing:.5px;white-space:nowrap}
+.xmas-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 30px;background:linear-gradient(90deg,#b0561a,#8f2323 48%,#d99a2b);padding:8px 5%;font-family:'Barlow Condensed',sans-serif;font-size:1.02rem;font-weight:700;letter-spacing:.5px;position:fixed;top:64px;left:0;right:0;z-index:998}
+.xmas-bar a{color:#fff;text-decoration:none;white-space:nowrap;transition:filter .18s,opacity .18s}
+.xmas-bar a:hover{filter:brightness(1.12)}
+.xmas-bar span{background:rgba(0,0,0,.24);border-radius:4px;padding:2px 9px;margin-left:9px;font-size:.88rem;letter-spacing:.5px;white-space:nowrap}
 /* The bar is fixed, so the hero has to be pushed down by hand or the banner
    sits on top of it. It wraps to two lines on a phone, hence the taller value. */
 .xmas-bar ~ .hero{padding-top:126px}
-@media(max-width:900px){.xmas-bar ~ .hero{padding-top:154px}}
-@media(max-width:600px){.xmas-bar{font-size:.92rem;padding:8px 4%;line-height:1.35}.xmas-bar span{display:inline-block;margin:5px 0 0}}
+@media(max-width:820px){.xmas-bar ~ .hero{padding-top:152px}}
+/* Below the point where the two links stop fitting side by side they stack,
+   and each one keeps its price chip on the same line as its own label. */
+@media(max-width:820px){.xmas-bar{flex-direction:column;gap:4px;font-size:.95rem;padding:7px 4%}}
+@media(max-width:420px){.xmas-bar{font-size:.88rem}.xmas-bar span{margin-left:7px;padding:1px 7px;font-size:.8rem}}
 
-/* The nav row holds a long logo ("OSPREY POWER WASH"), five links, a button and
-   now the seasonal item, but the hamburger did not take over until 600px. Across
-   the whole tablet range the logo was wrapping onto two and three lines. Two
-   rules fix it: hand the tablet range to the mobile menu that already exists,
-   and tighten the row on narrow laptops above it. */
-@media(max-width:900px){
+/* The nav row holds a long logo ("OSPREY POWER WASH"), six links and a button,
+   two of them seasonal, but the hamburger did not take over until 600px --
+   which wrapped the logo onto two and three lines across the whole tablet
+   range. Two rules fix it: hand everything below a real laptop width to the
+   mobile menu that already exists, and tighten the row above it. The takeover
+   point moved 900 -> 1000 when the fall page made it six links; check the nav
+   at 1000/1040/1100/1200 after ANY nav change here. */
+@media(max-width:1000px){
   .nav-links{display:none}
   .hamburger{display:flex}
 }
-@media(min-width:901px) and (max-width:1150px){
+@media(min-width:1001px) and (max-width:1250px){
   nav{padding:0 3%}
-  .nav-links{gap:17px}
-  .nav-links a{font-size:.8rem;letter-spacing:.2px}
-  .nav-logo{font-size:1.45rem;letter-spacing:1px;white-space:nowrap}
-  .nav-cta{white-space:nowrap}
+  .nav-links{gap:15px}
+  .nav-links a{font-size:.78rem;letter-spacing:.2px}
+  .nav-logo{font-size:1.4rem;letter-spacing:1px;white-space:nowrap}
+  .nav-cta{white-space:nowrap;padding-left:13px;padding-right:13px}
 }
 
 /* Booking form: what we may text about, and the optional marketing tick box.
