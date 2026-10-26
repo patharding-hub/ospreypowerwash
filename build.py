@@ -1723,6 +1723,259 @@ def linkgrid(title, items):
             % (title, rows))
 
 
+# ---------------------------------------------------------------------------
+# CHRISTMAS LIGHTS BY TOWN
+#
+# One lighting page per town we most want to be found in, so a search for
+# "christmas light installation ocean city nj" lands on a page about Ocean
+# City rather than on the general one. Each page shares the packages, the
+# what's-included list, the consultation form and the photos with
+# christmas-lights.html, but the words above them are written for that town
+# alone -- a page that only swaps the town name in is one Google learns to
+# ignore. Add a town here and it builds, joins the sitemap and gets linked
+# from christmas-lights.html and from that town's washing page.
+# ---------------------------------------------------------------------------
+XMAS_TOWNS = [
+    dict(
+        slug='ocean-city',
+        lead='Ocean City houses sit close together, a great many of them are duplexes, and '
+             'plenty belong to people who are not here in December. We design the lights '
+             'around all three.',
+        body=[
+            ('Duplexes, condos and the neighbor upstairs', [
+                'A lot of Ocean City buildings are two units, one up and one down, often with '
+                'two different owners. The roof line runs across both, so we design for your '
+                'half and stop it cleanly where your side ends &mdash; or, if the neighbor '
+                'wants in as well, we light the whole front as one job.',
+                'If there is a condo association involved, say so on the form. We will send '
+                'the design in a form you can hand to the board before anything goes up.',
+            ]),
+            ('Lit whether you are here or not', [
+                'Plenty of Ocean City owners spend the winter elsewhere and come down for '
+                'Thanksgiving or a weekend in December. You do not need to be home for the '
+                'install or the takedown, the timer runs the lights on the hours you choose, '
+                'and if something goes dark we come and fix it without you being there.',
+                'It suits a rental house just as well. A house that is lit looks looked '
+                'after through the quiet months, and it makes a better picture for next '
+                'summer&rsquo;s listing than a dark one does.',
+            ]),
+            ('Wind off the ocean and the bay', [
+                'An island takes wind from both sides. Every run is clipped along the '
+                'shingle line or the gutter edge rather than draped, and the cord is cut to '
+                'the length of your roof so there is no loose slack to catch a gust.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='sea-isle-city',
+        lead='In Sea Isle a house is often seen from two sides &mdash; the street, and the '
+             'lagoon or the bay behind it. We design for whichever side people actually look '
+             'at, and plenty of owners want both.',
+        body=[
+            ('Street side, water side', [
+                'Bayfront and lagoon houses have a second front, and in Sea Isle it is often '
+                'the better one: decks, railings and a roof line that the whole lagoon can '
+                'see. Rails and deck posts wrap as well as a porch does, and a lit back of '
+                'the house reflected in the water is the picture people remember.',
+                'When you ask for the design, send us a photo from the water side as well as '
+                'the street. Street View cannot see round the back.',
+            ]),
+            ('Townhouses and side-by-sides', [
+                'A lot of Sea Isle is side-by-side townhouses under one roof. We light your '
+                'unit and finish it neatly at the party wall, or light the whole building if '
+                'the owners next door want to match &mdash; the same color the whole way along '
+                'looks deliberate in a way that one lit half rarely does.',
+            ]),
+            ('No need to be down the shore for it', [
+                'Most of our Sea Isle customers are not here full time. You do not need to be '
+                'home for either visit, the lights come on and off on a timer, and anything '
+                'that goes dark in a winter blow gets fixed at no charge while the display is '
+                'up.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='avalon',
+        lead='Avalon houses are tall, wide and full of peaks, which is exactly what makes them '
+             'look so good lit &mdash; and exactly why nobody wants to be up there doing it '
+             'themselves in December.',
+        body=[
+            ('Three stories and a lot of roof line', [
+                'A new Avalon house is often three stories with several gables, dormers and a '
+                'roof deck, so the roof line on the front alone can run to a couple of hundred '
+                'feet. We measure it off the picture, cut the C9 cord to that length, and '
+                'take it right up to the peaks where a ladder from the hardware store will '
+                'not reach.',
+                'On a house this size the Destination package is the one that makes sense: '
+                'the roof, wreaths on the gables, the beds, the walk and the trees all done to '
+                'the same color, so the whole front reads as one design.',
+            ]),
+            ('Ready for when you come down', [
+                'Plenty of Avalon owners arrive for Thanksgiving, Christmas or New Year and '
+                'want the house already lit when they pull in. We install in October and '
+                'November whether or not you are here, the timer keeps it dark until the '
+                'date you choose, and takedown waits until you are done with it.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='stone-harbor',
+        lead='Stone Harbor yards are planted with care &mdash; specimen trees, clipped hedges, '
+             'window boxes &mdash; and the best displays here light the garden as much as the '
+             'house.',
+        body=[
+            ('The trees and the beds', [
+                'A lot of the look of a Stone Harbor house is in its planting, so that is '
+                'where most of the light goes. Specimen trees are wrapped up the trunk and '
+                'out along the main branches, hedges get mini LED on a fine wire that you '
+                'barely see in daylight, and the walk is lined to the door.',
+                'Warm white throughout is the classic choice and it suits the shingle and '
+                'cedar here. If you would rather see it in red and white or full color first, '
+                'say so and we will send the same house back in two or three.',
+            ]),
+            ('Shops and restaurants along 96th Street', [
+                'For a storefront the lights need to be on the day after Thanksgiving, which '
+                'puts the design in October and the install well before the holiday weekend. '
+                'Ask early, and tell us if a landlord or a manager needs to approve the '
+                'proposal first.',
+            ]),
+            ('Here or away, it stays lit', [
+                'You do not need to be home for the install or the takedown. The timer runs '
+                'it, and a run pulled loose by a north-easter gets fixed at no charge while '
+                'the display is up.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='cape-may',
+        lead='Cape May does Christmas better than anywhere on the shore, and its Victorian '
+             'houses were made for it: porches, columns, turrets and gingerbread trim that '
+             'light up like nothing else.',
+        body=[
+            ('Lighting a Victorian without harming it', [
+                'Old trim is not something to drive a nail into. Everything we put up clips '
+                'on &mdash; to the shingle line, the gutter edge, the porch rail &mdash; and '
+                'comes off again in January without leaving a mark on paint or wood.',
+                'The detail is the point on these houses, so the design follows it: C9 along '
+                'the eaves and up each gable, columns and spindles wrapped, garland across '
+                'the porch with wreaths at the windows, and the turret picked out on its own '
+                'if you have one.',
+            ]),
+            ('Inns, B&Bs and shops', [
+                'For an inn the lights are part of what guests come for, so they want to be '
+                'on for the first holiday weekend and stay faultless through New Year. Book '
+                'the design early, and maintenance is included &mdash; if a run goes dark on '
+                'a Friday night, one call and we come back to fix it.',
+            ]),
+            ('A design you see before you commit', [
+                'We draw the display on a picture of your own building, so you can check it '
+                'against the house, the street and anything the historic guidelines ask of '
+                'you before a single clip goes on.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='upper-township',
+        lead='Marmora, Tuckahoe, Seaville, Beesleys Point and Strathmere &mdash; Upper '
+             'Township is our nearest neighbor, just across the Tuckahoe River from our base '
+             'in Corbin City.',
+        body=[
+            ('Bigger lots, bigger trees', [
+                'Upper Township houses tend to sit back on proper lots with mature trees out '
+                'front, and those trees are where a display goes from nice to the one people '
+                'drive past slowly. We wrap the trunk and run out along the main branches, '
+                'light the beds to match, and line the drive if it is a long one.',
+                'Send us a photo with the trees in it when you ask for the design. Street '
+                'View tends to catch them in summer, with the leaves hiding what we will '
+                'actually be wrapping.',
+            ]),
+            ('Close by when something goes dark', [
+                'Maintenance is included the whole time the lights are up, and in Upper '
+                'Township we are rarely more than a few minutes away. A run pulled down by '
+                'wind or a bulb out on the front gets fixed quickly, at no charge.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='somers-point',
+        lead='Somers Point is an older bay town &mdash; capes, colonials and front porches on '
+             'tree-lined streets &mdash; and those are some of the nicest houses to light on '
+             'the whole mainland.',
+        body=[
+            ('Porches, columns and a proper roof line', [
+                'Older houses have the detail a display needs: a front porch to wrap, columns '
+                'to spiral, a door to frame with garland and a clean gable to pick out in '
+                'C9. Classic Plus &mdash; the roof line, a wreath and the beds &mdash; is the '
+                'package most Somers Point houses suit.',
+            ]),
+            ('Bay wind and older gutters', [
+                'Houses near the bay take the wind straight off the water. Every run is '
+                'clipped rather than draped, cut to length so nothing flaps, and nothing goes '
+                'into the fascia or the trim &mdash; older gutters and wood get clipped to, '
+                'never screwed into.',
+            ]),
+            ('Designed without a visit', [
+                'Most Somers Point streets are well covered by Street View, so we can usually '
+                'draw your display without coming out. If trees hide the front, a couple of '
+                'photos from your phone does the job.',
+            ]),
+        ],
+    ),
+    dict(
+        slug='egg-harbor-township',
+        lead='From the developments off Ocean Heights to the older streets near the bay, Egg '
+             'Harbor Township is two-story houses with a garage, a front bed and a street of '
+             'neighbors &mdash; and a lit house stands out on every one of them.',
+        body=[
+            ('Two stories, a garage and the beds', [
+                'The typical EHT front is a two-story roof line, a garage with a gable over '
+                'it and a planted bed along the front. Classic lights the roof; Classic Plus '
+                'adds a wreath on the garage gable and the shrubs wrapped to match, which is '
+                'where most houses here end up.',
+            ]),
+            ('Neighborhood rules', [
+                'If you are in a development with an HOA, tell us on the form. Some have '
+                'rules on colors or on when displays can go up and come down, and we will '
+                'design to them &mdash; the design comes as a picture you can send to the '
+                'committee first.',
+            ]),
+            ('No ladder, no attic full of boxes', [
+                'We bring the lights, put them up, keep them working and take them away in '
+                'January. You do not need to be home for any of it, and there is nothing to '
+                'store in the garage for the other eleven months.',
+            ]),
+        ],
+    ),
+]
+
+TOWN_BY_SLUG = {t['slug']: t for t in TOWNS}
+TOWN_XMAS = {x['slug'] for x in XMAS_TOWNS}
+XMAS_TOWN_LINKS = [('christmas-lights-%s.html' % x['slug'], TOWN_BY_SLUG[x['slug']]['name'])
+                   for x in XMAS_TOWNS]
+
+
+def xmas_town_page(x):
+    """A town's lighting page, as a SERVICES-shaped dict build_service can draw:
+    everything from christmas-lights.html, with the town's own words on top."""
+    t = TOWN_BY_SLUG[x['slug']]
+    base = next(s for s in SERVICES if s['slug'] == 'christmas-lights')
+    return dict(
+        base,
+        slug='christmas-lights-' + t['slug'],
+        nav='Christmas lights in %s' % t['name'],
+        h1=('CHRISTMAS LIGHTS', 'IN %s' % t['name'].upper()),
+        title='Christmas Light Installation in %s, NJ' % t['name'],
+        desc=('Christmas light installation in %s, NJ, from $%s. Designed on a photo of your '
+              'house, commercial LED, maintained all season, taken down and stored.'
+              % (t['name'], XMAS_PACKAGES[0]['price'])),
+        lead=x['lead'],
+        body=x['body'],
+        crumbs=[('christmas-lights.html', 'Christmas Lights'), t['name']],
+        area=t,
+        cta_head='See your own %s house lit up first' % t['name'],
+    )
+
+
 SERVICE_LINKS = [(s['slug'] + '.html', s['nav']) for s in SERVICES]
 TOWN_LINKS = [(t['slug'] + '.html', t['name']) for t in TOWNS]
 
@@ -1741,11 +1994,25 @@ def build_service(s):
          'description': s['desc'],
          'areaServed': [{'@type': 'City', 'name': t['name']} for t in TOWNS]},
     ]}
+    area = s.get('area')
+    if area:
+        ld['@graph'][1]['areaServed'] = {
+            '@type': 'City', 'name': area['name'],
+            'containedInPlace': {'@type': 'AdministrativeArea',
+                                 'name': area['county'] + ', New Jersey'}}
+    crumbs = ''.join('<a href="%s">%s</a> &rsaquo; ' % (h, html.escape(n))
+                     for h, n in s.get('crumbs', [])[:-1])
+    crumb_last = s['crumbs'][-1] if s.get('crumbs') else s['nav']
+    lights = s['slug'].startswith('christmas-lights')
+    towns = (linkgrid('Christmas lights by town',
+                      [x for x in XMAS_TOWN_LINKS if x[0] != s['slug'] + '.html'])
+             if lights else linkgrid('Towns we cover', TOWN_LINKS))
     parts = [
         head(s['title'], s['desc'], canonical, s['image'], ld, s.get('theme', '')),
         NAV, MOB,
         hero_open,
-        '  <div class="crumb"><a href="index.html">Home</a> &rsaquo; %s</div>' % html.escape(s['nav']),
+        '  <div class="crumb"><a href="index.html">Home</a> &rsaquo; %s%s</div>'
+        % (crumbs, html.escape(crumb_last)),
         '  <h1>%s<em>%s</em></h1>' % s['h1'],
         '  <p>%s</p>' % s['lead'],
         '  <div class="hero-btns">',
@@ -1768,7 +2035,7 @@ def build_service(s):
         if s.get('form') else '',
         figures(s.get('gallery')),
         linkgrid('Other services', [x for x in SERVICE_LINKS if x[0] != s['slug'] + '.html']),
-        linkgrid('Towns we cover', TOWN_LINKS),
+        towns,
         endcta(s.get('cta', 'Prices are on screen in the estimator, and nothing is due until '
                             'the work is finished. Book the date yourself when you are ready.'),
                s.get('cta_head', 'Get a price without picking up the phone'),
@@ -1810,7 +2077,10 @@ def build_town(t):
         prose(t['body']),
         '  </div>',
         '</section>',
-        linkgrid('What we clean in %s' % html.escape(t['name']), SERVICE_LINKS),
+        linkgrid('What we clean in %s' % html.escape(t['name']),
+                 [('christmas-lights-%s.html' % t['slug'], n)
+                  if h == 'christmas-lights.html' and t['slug'] in TOWN_XMAS else (h, n)
+                  for h, n in SERVICE_LINKS]),
         linkgrid('Other towns', [x for x in TOWN_LINKS if x[0] != t['slug'] + '.html']),
         endcta('Measure your own property off the satellite view, see the price on screen, '
                'and pick a date. No calls needed.'),
@@ -2268,6 +2538,11 @@ def main():
     for t in TOWNS:
         fn = t['slug'] + '.html'
         open(fn, 'w', encoding='utf-8', newline='\r\n').write(build_town(t))
+        written.append(fn)
+    for x in XMAS_TOWNS:
+        s = xmas_town_page(x)
+        fn = s['slug'] + '.html'
+        open(fn, 'w', encoding='utf-8', newline='\r\n').write(build_service(s))
         written.append(fn)
 
     legal = []
