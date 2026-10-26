@@ -18,6 +18,26 @@ BIZ = 'Osprey Power Wash'
 LEGAL = 'Tidal Wash LLC'
 PHONE_PRETTY = '(609) 732-2007'
 PHONE_E164 = '+16097322007'
+
+# Osprey's own Meta dataset ("Osprey CRM Conversions" in Events Manager). The CRM
+# sends Osprey's conversions to it too, so site visits and paid jobs land in one
+# place. Never put Tidal Wash's pixel (614831401421194) on this site.
+META_PIXEL_ID = '1765569311150702'
+META_PIXEL = '\n'.join([
+    '<!-- Meta Pixel Code -->',
+    '<script>',
+    '!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?'
+    'n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;'
+    'n.push=n;n.loaded=!0;n.version=\'2.0\';n.queue=[];t=b.createElement(e);t.async=!0;'
+    't.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}'
+    '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');',
+    "fbq('init','%s');" % META_PIXEL_ID,
+    "fbq('track','PageView');",
+    '</script>',
+    '<noscript><img height="1" width="1" style="display:none" alt="" '
+    'src="https://www.facebook.com/tr?id=%s&amp;ev=PageView&amp;noscript=1"></noscript>' % META_PIXEL_ID,
+    '<!-- End Meta Pixel Code -->',
+])
 EMAIL = 'contact@ospreypowerwash.com'
 INSTAGRAM = 'https://www.instagram.com/ospreypowerwash/'
 BRAND_KEY = 'osprey'   # which workbook the shared booking endpoint writes to
@@ -1272,6 +1292,7 @@ def head(title, desc, canonical, image, ld, body_class=''):
         '<meta property="og:url" content="%s">' % canonical,
         '<meta property="og:image" content="%s/img/%s">' % (SITE, image),
         '<meta name="twitter:card" content="summary_large_image">',
+        META_PIXEL,
         '<link rel="preconnect" href="https://fonts.googleapis.com">',
         '<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">',
         '<link rel="stylesheet" href="css/site.css?v=%s">' % asset_v(),
